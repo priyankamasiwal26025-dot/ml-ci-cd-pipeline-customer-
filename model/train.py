@@ -4,8 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 import joblib
 
 # Load the dataset
-data = pd.read_csv(r"C:\ml-ci-cd-pipeline(customer)\data\WA_Fn-UseC_-Telco-Customer-Churn.csv")
-
+df = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 # Preprocess the dataset
 X = data.drop('Churn', axis=1)
 y = data['Churn']
