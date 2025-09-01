@@ -1,23 +1,27 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 import joblib
+from sklearn.metrics import accuracy_score, classification_report
 
 # Load the dataset
 df = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
-# Preprocess the dataset
-X = data.drop('Churn', axis=1)
-y = data['Churn']
+df = df.dropna()  # drop missing values (same as train.py)
 
-# Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Prepare features and target
+X = df.drop('Churn', axis=1)
+y = df['Churn']
 
-# Load the saved model
+# One-hot encode categorical variables (must match train.py)
+X = pd.get_dummies(X)
+
+# Load the trained model
 model = joblib.load('model/Churn_model.pkl')
 
 # Make predictions
-y_pred = model.predict(X_test)
+y_pred = model.predict(X)
 
 # Evaluate the model
-accuracy = accuracy_score(y_test, y_pred)
-print(f'Model accuracy: {accuracy:.2f}')
+accuracy = accuracy_score(y, y_pred)
+print(f"✅ Model Accuracy: {accuracy:.2f}")
+
+print("\nClassification Report:")
+print(classification_report(y, y_pred))
