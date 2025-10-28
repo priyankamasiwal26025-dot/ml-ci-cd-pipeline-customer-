@@ -6,6 +6,12 @@ import joblib
 # Load the dataset
 data = pd.read_csv(r"data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
 
+# Drop non-numeric columns that are not features
+df = data.drop(['CustomerID'], axis=1)
+
+# Convert categorical variables to numeric
+df = pd.get_dummies(df, drop_first=True)
+
 # Preprocess the dataset
 X = data.drop('Churn', axis=1)
 y = data['Churn']
