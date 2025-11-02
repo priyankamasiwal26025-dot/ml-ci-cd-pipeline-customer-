@@ -6,66 +6,49 @@ import joblib
 import numpy as np
 from flask import Flask, request, jsonify
 
-
-#Config
 MODEL_PATH = os.getenv("MODEL_PATH", "model/Churn_model.pkl")
 
-#App
-
 app = Flask(__name__)
-
-
-
-#load once at startup
 
 try:
     model = joblib.load(MODEL_PATH)
 except Exception as e:
-    #Fail fast with message
-    raise RuntimeError(f"Couldn't load the model from {MODEL_PATH}:{e}")
-    
-    
+    raise RuntimeError(f"Couldn't load the model from {MODEL_PATH}: {e}")
+
+@app.route('/')
+def home():
+    return jsonify({
+        "message": "Churn Prediction API is live!",
+        "routes": {
+            "/health": "Health check endpoint",
+            "/predict": "POST endpoint for churn prediction"
+        },
+        "usage": {
+            "example_input": {"input": [[1, 0, 23, 45, 12000, 2]]}
+        }
+    })
+
 @app.get("/health")
 def health():
-    return{"status":"ok"}, 200
-    
-    
+    return {"status": "ok"}, 200
+
 @app.post("/predict")
 def predict():
-    """
-    
-    Accepts wither :
-    {input":[[feature vector]]} #2d List
-    
-    or
-    
-    {"Input":[feature vector]  #1d list
-    """
-    
     try:
         payload = request.get_json(force=True)
         x = payload.get("input")
         if x is None:
             return jsonify(error="Missing input"), 400
 
-        # Normalize 2d array
-        if isinstance(x, list) and (len(x) > 0) and not isinstance(x[0], list):
+        if isinstance(x, list) and len(x) > 0 and not isinstance(x[0], list):
             x = [x]
 
         X = np.array(x, dtype=float)
         preds = model.predict(X)
-        preds = preds.tolist()
-        return jsonify(prediction=preds), 200
+        return jsonify(prediction=preds.tolist()), 200
 
     except Exception as e:
         return jsonify(error=str(e)), 500
-    
-    
-    
+
 if __name__ == "__main__":
-    #Render wil run with gunicorn
-    
-    app.run(host = "0.0.0.0", port = int(os.environ.get("PORT", 8000)))
-    
-    
-    
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
